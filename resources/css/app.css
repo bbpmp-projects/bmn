@@ -1,0 +1,18 @@
+/* Custom styles untuk BMN Project */
+.aspect-w-16 {
+    position: relative;
+}
+
+.aspect-w-16::before {
+    content: "";
+    display: block;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.aspect-h-9 {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
