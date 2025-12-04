@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+=======
+>>>>>>> e9ebf2e08163f7bdafeadb8ea2fdc815a2b6c61d
 
 class AdminController extends Controller
 {
     // Method untuk menampilkan dashboard admin
+<<<<<<< HEAD
     public function dashboard(Request $request)
     {
         // Middleware sudah menangani pengecekan admin
@@ -81,3 +85,10 @@ class AdminController extends Controller
     
   
 }
+=======
+    public function dashboard()
+    {
+        return view('admin.dashboard');
+    }
+}
+>>>>>>> e9ebf2e08163f7bdafeadb8ea2fdc815a2b6c61d

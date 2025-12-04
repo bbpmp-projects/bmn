@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+<<<<<<< HEAD
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PermintaanController;
@@ -57,3 +58,14 @@ Route::middleware(['auth.check', 'admin'])->prefix('admin')->name('admin.')->gro
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
+=======
+use App\Http\Controllers\AdminController;
+
+//admin
+
+Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+
+// user
+Route::get('/', [HomeController::class, 'index'])->name('home');
+>>>>>>> e9ebf2e08163f7bdafeadb8ea2fdc815a2b6c61d
