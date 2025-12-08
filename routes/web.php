@@ -3,7 +3,6 @@
 use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-<<<<<<< HEAD
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\PermintaanController;
@@ -41,7 +40,7 @@ Route::middleware('auth.check')->group(function () {
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
-    // Profile Routes - FIXED: Gunakan name yang benar
+    // Profile Routes
     Route::prefix('profile')->group(function () {
         Route::get('/', [ProfileController::class, 'index'])->name('profile.index');
         Route::post('/update', [ProfileController::class, 'update'])->name('profile.update');
@@ -50,22 +49,27 @@ Route::middleware('auth.check')->group(function () {
     
     // Permintaan Routes
     Route::get('/permintaan', [PermintaanController::class, 'index'])->name('permintaan.index');
+    Route::get('/api/barang-by-kategori/{id_kategori}', [PermintaanController::class, 'getBarangByKategori']);
+    Route::post('/api/search-barang', [PermintaanController::class, 'searchBarang']);
+    Route::post('/permintaan/submit', [PermintaanController::class, 'submitPermintaan'])->name('permintaan.submit');
+    
+    // Status dan Riwayat Permintaan
+    Route::get('/permintaan/status', [PermintaanController::class, 'statusPermintaan'])->name('permintaan.status');
+    
+    // API untuk mendapatkan data detail permintaan (untuk modal)
+    Route::get('/permintaan/detail-data/{id}', [PermintaanController::class, 'getDetailPermintaan'])->name('permintaan.detail.data');
+    
+    // Route halaman detail (optional - bisa dihapus atau dipertahankan untuk akses langsung)
+    Route::get('/permintaan/detail/{kode_permintaan}', [PermintaanController::class, 'detailPermintaan'])->name('permintaan.detail');
+    Route::get('/permintaan/riwayat', [PermintaanController::class, 'riwayatPermintaan'])->name('permintaan.riwayat');
+
+    // Daftar Barang
+    Route::get('/barang/daftar', [PermintaanController::class, 'daftarBarang'])->name('barang.daftar');
+    Route::get('/api/barang/daftar', [PermintaanController::class, 'getDaftarBarang'])->name('api.barang.daftar');
 });
 
-// ===== ADMIN ROUTES  =====
+// ===== ADMIN ROUTES =====
 Route::middleware(['auth.check', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
-
-=======
-use App\Http\Controllers\AdminController;
-
-//admin
-
-Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-
-
-// user
-Route::get('/', [HomeController::class, 'index'])->name('home');
->>>>>>> e9ebf2e08163f7bdafeadb8ea2fdc815a2b6c61d

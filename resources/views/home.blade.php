@@ -109,8 +109,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Permintaan Barang</h3>
                     <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-                        Buat pengajuan permintaan barang baru dengan formulir yang mudah diisi. 
-                        Lengkapi dengan spesifikasi dan dokumen yang diperlukan.
+                        Buat pengajuan permintaan barang baru dengan formulir yang mudah diisi.
                     </p>
                     <div class="bg-blue-50 rounded-lg p-3 mb-4">
                         <p class="text-blue-700 text-xs font-medium">Fitur Unggulan:</p>
@@ -144,8 +143,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Status Permintaan</h3>
                     <p class="text-gray-600 mb-4 text-sm leading-relaxed">
-                        Pantau perkembangan permintaan barang Anda secara real-time. 
-                        Dapatkan notifikasi setiap ada update status.
+                        Pantau perkembangan permintaan barang Anda secara real-time.
                     </p>
                     <div class="bg-green-50 rounded-lg p-3 mb-4">
                         <p class="text-green-700 text-xs font-medium">Status Tracking:</p>
@@ -164,9 +162,10 @@
                             Timeline proses
                         </li>
                     </ul>
-                    <button class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 w-full font-medium">
+                    <a href="{{ route('permintaan.status') }}"
+                     class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-300 w-full font-medium flex items-center justify-center">
                         <i class="fas fa-search mr-2"></i>Cek Status
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -179,7 +178,6 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-3">Riwayat Permintaan</h3>
                     <p class="text-gray-600 mb-4 text-sm leading-relaxed">
                         Akses arsip lengkap semua permintaan barang yang pernah diajukan. 
-                        Berguna untuk evaluasi dan pelaporan.
                     </p>
                     <div class="bg-purple-50 rounded-lg p-3 mb-4">
                         <p class="text-purple-700 text-xs font-medium">Fitur Arsip:</p>
@@ -198,9 +196,9 @@
                             Export data
                         </li>
                     </ul>
-                    <button class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition duration-300 w-full font-medium">
+                    <a href="{{ route('permintaan.riwayat') }}" class="bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition duration-300 w-full font-medium flex items-center justify-center">
                         <i class="fas fa-history mr-2"></i>Lihat Riwayat
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

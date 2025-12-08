@@ -280,6 +280,7 @@
         .sidebar.collapsed .menu-icon {
             margin: 0;
         }
+        
 
         .font-cinzel-decorative {
             font-family: 'Cinzel Decorative', cursive;

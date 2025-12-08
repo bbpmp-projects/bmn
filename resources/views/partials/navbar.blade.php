@@ -65,15 +65,23 @@
                                     </div>
                                 </a>
                                 
-                                <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                <a href="{{ route('permintaan.status') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
                                     <i class="fas fa-tasks mr-3 text-green-500"></i>
                                     <div>
                                         <div class="font-medium">Status Permintaan</div>
                                         <div class="text-xs text-gray-500">Pantau status pengajuan</div>
                                     </div>
                                 </a>
+
+                                <a href="{{ route('permintaan.riwayat') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                    <i class="fas fa-history mr-3 text-blue-500"></i>
+                                    <div>
+                                        <div class="font-medium">Riwayat Permintaan</div>
+                                        <div class="text-xs text-gray-500">Lihat Riwayat Permintaan</div>
+                                    </div>
+                                </a>
                                 
-                                <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
+                                <a href="{{ route('barang.daftar') }}" class="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200">
                                     <i class="fas fa-boxes mr-3 text-purple-500"></i>
                                     <div>
                                         <div class="font-medium">Daftar Barang</div>
@@ -170,11 +178,15 @@
                         <i class="fas fa-cart-plus mr-3 text-blue-500 text-xs"></i>
                         Permintaan Barang
                     </a>
-                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm transition duration-200">
+                    <a href="{{ route('permintaan.status') }}" class="flex items-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm transition duration-200">
                         <i class="fas fa-tasks mr-3 text-green-500 text-xs"></i>
                         Status Permintaan
                     </a>
-                    <a href="#" class="flex items-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm transition duration-200">
+                    <a href="{{ route('permintaan.riwayat') }}" class="flex items-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm transition duration-200">
+                        <i class="fas fa-history mr-3 text-blue-500 text-xs"></i>
+                        Riwayat Permintaan
+                    </a>
+                    <a href="{{ route('barang.daftar') }}" class="flex items-center text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm transition duration-200">
                         <i class="fas fa-boxes mr-3 text-purple-500 text-xs"></i>
                         Daftar Barang
                     </a>

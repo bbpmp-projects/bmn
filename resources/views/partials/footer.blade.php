@@ -46,15 +46,15 @@
                         <i class="fas fa-chevron-right text-xs mr-2"></i>Home
                     </a></li>
 
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
+                    <li><a href="#about" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
                         <i class="fas fa-chevron-right text-xs mr-2"></i>Tentang Kami
                     </a></li>
 
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
+                    <li><a href="#features" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
                         <i class="fas fa-chevron-right text-xs mr-2"></i>Fitur
                     </a></li>
 
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
+                    <li><a href="#contact" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
                         <i class="fas fa-chevron-right text-xs mr-2"></i>Kontak
                     </a></li>
                 </ul>
@@ -64,11 +64,11 @@
             <div>
                 <h3 class="font-bold text-lg mb-4">Layanan</h3>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
+                    <li><a href="{{ route('barang.daftar') }}" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
                         <i class="fas fa-chevron-right text-xs mr-2"></i>Data Barang
                     </a></li>
 
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
+                    <li><a href="{{ route('permintaan.index') }}" class="text-gray-400 hover:text-white transition duration-300 flex items-center">
                         <i class="fas fa-chevron-right text-xs mr-2"></i>Pengajuan BMN
                     </a></li>
 
@@ -99,9 +99,9 @@
                 </ul>
 
                 <div class="flex space-x-3 mt-4">
-                    <a href="#" class="bg-gray-700 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="bg-gray-700 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="bg-gray-700 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center"><i class="fab fa-instagram"></i></a>
+                    <a href="https://web.facebook.com/admin.bbpmpjabar/" class="bg-gray-700 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="bg-gray-700 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center"><i class="fab fa-x"></i></a>
+                    <a href="https://www.instagram.com/bbpmpjabar/" class="bg-gray-700 hover:bg-blue-600 w-9 h-9 rounded-full flex items-center justify-center"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
 
