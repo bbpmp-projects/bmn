@@ -149,40 +149,64 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Tampilkan hasil pencarian
+    // Tampilkan hasil pencarian dengan indikator stok
     function tampilkanHasilPencarian(hasil) {
         const listBarang = document.getElementById('list-barang');
         const daftarBarang = document.getElementById('daftar-barang');
         
         if (hasil.length > 0) {
-            listBarang.innerHTML = hasil.map(barang => `
-                <div class="bg-white p-3 rounded-lg border border-gray-200 hover:border-blue-500 cursor-pointer transition duration-200 barang-item" 
-                     data-id="${barang.id || barang.id_barang}"
-                     data-kode="${barang.kode_barang}"
-                     data-nama="${barang.nama_barang}"
-                     data-satuan="${barang.satuan}">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div class="font-medium text-gray-900">${barang.nama_barang}</div>
-                            <div class="text-sm text-gray-600">Kode: ${barang.kode_barang}</div>
+            listBarang.innerHTML = hasil.map(barang => {
+                const stok = parseInt(barang.stock || 0);
+                const tersedia = stok > 0;
+                const kelasBorder = tersedia ? 'border-gray-200 hover:border-blue-500' : 'border-red-300';
+                const kelasBg = tersedia ? 'bg-white' : 'bg-red-50';
+                const indikatorStok = tersedia ? 
+                    `<span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">Tersedia</span>` : 
+                    `<span class="text-xs text-red-600 bg-red-100 px-2 py-1 rounded">Tidak Tersedia</span>`;
+                
+                return `
+                    <div class="${kelasBg} p-3 rounded-lg border ${kelasBorder} cursor-pointer transition duration-200 barang-item" 
+                         data-id="${barang.id || barang.id_barang}"
+                         data-kode="${barang.kode_barang}"
+                         data-nama="${barang.nama_barang}"
+                         data-satuan="${barang.satuan}"
+                         data-stock="${stok}"
+                         data-tersedia="${tersedia}">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-900">${barang.nama_barang}</div>
+                                <div class="text-sm text-gray-600">Kode: ${barang.kode_barang}</div>
+                            </div>
+                            <div class="text-right ml-4">
+                                <div class="text-sm text-gray-500 mb-1">${barang.satuan || '-'}</div>
+                                ${indikatorStok}
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-sm text-gray-500">${barang.satuan || '-'}</div>
-                        </div>
+                        ${!tersedia ? 
+                            '<div class="mt-2 text-xs text-red-500 italic">Barang tidak dapat ditambahkan ke permintaan</div>' : 
+                            ''
+                        }
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             
             daftarBarang.classList.remove('hidden');
             
             // Event listener untuk memilih barang
             document.querySelectorAll('.barang-item').forEach(item => {
                 item.addEventListener('click', function() {
+                    const tersedia = this.dataset.tersedia === 'true';
+                    if (!tersedia) {
+                        tampilkanToastError('Barang tidak tersedia, tidak dapat dipilih');
+                        return;
+                    }
+                    
                     pilihBarang({
                         id: this.dataset.id,
                         kode: this.dataset.kode,
                         nama: this.dataset.nama,
-                        satuan: this.dataset.satuan
+                        satuan: this.dataset.satuan,
+                        stock: parseInt(this.dataset.stock)
                     });
                 });
             });
@@ -208,13 +232,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Fungsi pilih barang
+    // Fungsi pilih barang dengan validasi stok
     function pilihBarang(barang) {
+        // Validasi stok
+        if (barang.stock <= 0) {
+            tampilkanToastError('Barang tidak tersedia, tidak dapat dipilih');
+            return;
+        }
+        
         barangDipilih = barang;
         document.getElementById('nama-barang-dipilih').textContent = barang.nama;
         document.getElementById('kode-barang-dipilih').textContent = `(${barang.kode})`;
         document.getElementById('satuan-barang').value = barang.satuan;
         document.getElementById('jumlah-barang').value = '';
+        
+        // Tambah informasi stok minimum
+        document.getElementById('jumlah-barang').max = barang.stock;
+        document.getElementById('jumlah-barang').placeholder = `Min: 1`;
         
         document.getElementById('form-jumlah').classList.remove('hidden');
     }
@@ -229,20 +263,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 100);
     });
 
-    // Event listener untuk tambah ke keranjang
+    // Event listener untuk tambah ke keranjang dengan validasi stok
     document.getElementById('tambah-ke-keranjang').addEventListener('click', function() {
         const jumlah = parseInt(document.getElementById('jumlah-barang').value);
+        const stockTersedia = barangDipilih.stock;
         
         if (!jumlah || jumlah < 1) {
             tampilkanToastError('Masukkan jumlah yang valid');
             return;
         }
         
-        // Tambah ke keranjang
-        keranjangBarang.push({
-            ...barangDipilih,
-            jumlah: jumlah,
-        });
+        // Validasi stok
+        if (jumlah > stockTersedia) {
+            tampilkanToastError(`Jumlah melebihi stok tersedia. Stok: ${stockTersedia}`);
+            return;
+        }
+        
+        // Cek apakah barang sudah ada di keranjang
+        const barangSudahAda = keranjangBarang.find(item => item.kode === barangDipilih.kode);
+        if (barangSudahAda) {
+            const totalSetelahDitambah = barangSudahAda.jumlah + jumlah;
+            if (totalSetelahDitambah > stockTersedia) {
+                tampilkanToastError(`Total jumlah barang "${barangDipilih.nama}" melebihi stok tersedia`);
+                return;
+            }
+            // Update jumlah jika barang sudah ada
+            barangSudahAda.jumlah = totalSetelahDitambah;
+            tampilkanToastSukses(`Jumlah barang "${barangDipilih.nama}" diperbarui menjadi ${totalSetelahDitambah}`);
+        } else {
+            // Tambah ke keranjang
+            keranjangBarang.push({
+                ...barangDipilih,
+                jumlah: jumlah,
+            });
+            tampilkanToastSukses('Barang berhasil ditambahkan ke daftar permintaan');
+        }
         
         // Update tabel
         updateTabelPermintaan();
@@ -264,9 +319,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Enable submit button
         document.getElementById('submit-permintaan').disabled = false;
-        
-        // Tampilkan toast sukses
-        tampilkanToastSukses('Barang berhasil ditambahkan ke daftar permintaan');
     });
 
     // ===============================
@@ -277,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let dataPermintaanSementara = null;
     let submitButtonElement = null;
 
-    // Event listener untuk submit permintaan
+    // Event listener untuk submit permintaan dengan validasi stok
     document.getElementById('submit-permintaan').addEventListener('click', function() {
         const tanggalPermintaan = document.getElementById('tanggal-permintaan').value;
         
@@ -288,6 +340,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (keranjangBarang.length === 0) {
             tampilkanToastError('Harap tambahkan barang terlebih dahulu');
+            return;
+        }
+        
+        // Validasi stok sebelum menampilkan modal
+        const adaBarangMelebihiStok = keranjangBarang.some(barang => barang.jumlah > barang.stock);
+        if (adaBarangMelebihiStok) {
+            tampilkanToastError('Ada barang yang melebihi stok tersedia. Periksa kembali daftar permintaan.');
             return;
         }
         
@@ -325,7 +384,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td class="px-4 py-3 text-sm text-center text-gray-700">${index + 1}</td>
                 <td class="px-4 py-3 text-sm text-gray-700">${barang.kode}</td>
                 <td class="px-4 py-3 text-sm text-gray-700">${barang.nama}</td>
-                <td class="px-4 py-3 text-sm text-center text-gray-700">${barang.jumlah}</td>
+                <td class="px-4 py-3 text-sm text-center text-gray-700">
+                    <div class="flex flex-col items-center">
+                        <span>${barang.jumlah}</span>
+                        <span class="text-xs text-gray-500">Stok: ${barang.stock}</span>
+                    </div>
+                </td>
                 <td class="px-4 py-3 text-sm text-center text-gray-700">${barang.satuan}</td>
             `;
             daftarBarangElement.appendChild(row);
@@ -361,10 +425,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         dataPermintaanSementara = null;
         
-        // Reset tombol submit jika perlu
+        // Reset tombol submit ke state normal jika modal ditutup tanpa submit
         if (submitButtonElement) {
             submitButtonElement.disabled = false;
             submitButtonElement.innerHTML = 'Submit Permintaan';
+            submitButtonElement = null;
         }
     }
 
@@ -435,142 +500,111 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         dataPermintaanSementara = null;
         
-        // Reset tombol submit jika perlu
+        // Reset tombol submit ke state normal jika modal ditutup tanpa submit
         if (submitButtonElement) {
             submitButtonElement.disabled = false;
             submitButtonElement.innerHTML = 'Submit Permintaan';
+            submitButtonElement = null;
         }
     }
 
-       // Fungsi untuk submit permintaan final - REVISI DENGAN RESET TOMBOL
-function submitPermintaanFinal() {
-    console.log('Submit permintaan final dipanggil');
-    
-    // Simpan data sementara untuk digunakan nanti
-    const tempData = { ...dataPermintaanSementara };
-    
-    // Tutup modal 2
-    const modal2 = document.getElementById('modal-verifikasi2');
-    if (modal2) {
-        modal2.classList.add('hidden');
-    }
-    
-    // Tampilkan modal loading
-    tampilkanModalLoading();
-    
-    // Disable tombol submit
-    if (submitButtonElement) {
-        submitButtonElement.disabled = true;
-        submitButtonElement.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...';
-    }
-    
-    // Format data barang sebagai ARRAY untuk Laravel
-    const barangArray = tempData.keranjangBarang.map(item => ({
-        id: item.id,
-        kode: item.kode,
-        nama: item.nama,
-        jumlah: item.jumlah,
-        satuan: item.satuan
-    }));
-    
-    // Kirim request
-    const formDataObj = new FormData();
-    formDataObj.append('_token', csrfToken);
-    formDataObj.append('tanggal_permintaan', tempData.tanggal_permintaan);
-    formDataObj.append('nama_pemohon', tempData.nama_pemohon);
-    formDataObj.append('unit_kerja', tempData.unit_kerja);
-    
-    barangArray.forEach((barang, index) => {
-        formDataObj.append(`barang[${index}][id]`, barang.id || '');
-        formDataObj.append(`barang[${index}][kode]`, barang.kode);
-        formDataObj.append(`barang[${index}][nama]`, barang.nama);
-        formDataObj.append(`barang[${index}][jumlah]`, barang.jumlah);
-        formDataObj.append(`barang[${index}][satuan]`, barang.satuan || '');
-    });
-    
-    // Kirim request dengan timeout
-    const fetchPromise = fetch('/permintaan/submit', {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: formDataObj
-    });
-    
-    // Timeout setelah 5 detik
-    const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout')), 5000);
-    });
-    
-    // Race antara fetch dan timeout
-    Promise.race([fetchPromise, timeoutPromise])
-    .then(response => {
-        console.log('Response received');
-        // Tidak peduli response apa, anggap sukses
-        return { success: true };
-    })
-    .catch(error => {
-        console.log('Fetch error or timeout:', error.message);
-        // Tetap anggap sukses karena data sudah dikirim
-        return { success: true };
-    })
-    .then(data => {
-        // SUKSES - selalu tampilkan modal sukses
-        console.log('Showing success modal');
+    // Fungsi untuk submit permintaan final - REVISI DENGAN RESET TOMBOL
+    function submitPermintaanFinal() {
+        console.log('Submit permintaan final dipanggil');
         
-        // RESET TOMBOL SUBMIT KE STATE NORMAL
+        // Simpan data sementara untuk digunakan nanti
+        const tempData = { ...dataPermintaanSementara };
+        
+        // Tutup modal 2
+        const modal2 = document.getElementById('modal-verifikasi2');
+        if (modal2) {
+            modal2.classList.add('hidden');
+        }
+        
+        // Tampilkan modal loading
+        tampilkanModalLoading();
+        
+        // Disable tombol submit
         if (submitButtonElement) {
-            submitButtonElement.disabled = false; // ENABLE KEMBALI
-            submitButtonElement.innerHTML = 'Submit Permintaan'; // RESET TEXT
+            submitButtonElement.disabled = true;
+            submitButtonElement.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Mengirim...';
         }
         
-        // Tutup modal loading
-        tutupModalLoading();
+        // Format data barang sebagai ARRAY untuk Laravel
+        const barangArray = tempData.keranjangBarang.map(item => ({
+            id: item.id,
+            kode: item.kode,
+            nama: item.nama,
+            jumlah: item.jumlah,
+            satuan: item.satuan
+        }));
         
-        // Reset form
-        resetForm();
+        // Kirim request
+        const formDataObj = new FormData();
+        formDataObj.append('_token', csrfToken);
+        formDataObj.append('tanggal_permintaan', tempData.tanggal_permintaan);
+        formDataObj.append('nama_pemohon', tempData.nama_pemohon);
+        formDataObj.append('unit_kerja', tempData.unit_kerja);
         
-        // Tampilkan modal sukses
-        tampilkanModalSukses(tempData);
+        barangArray.forEach((barang, index) => {
+            formDataObj.append(`barang[${index}][id]`, barang.id || '');
+            formDataObj.append(`barang[${index}][kode]`, barang.kode);
+            formDataObj.append(`barang[${index}][nama]`, barang.nama);
+            formDataObj.append(`barang[${index}][jumlah]`, barang.jumlah);
+            formDataObj.append(`barang[${index}][satuan]`, barang.satuan || '');
+        });
         
-        // Clear data sementara
-        dataPermintaanSementara = null;
-        submitButtonElement = null; // Reset reference juga
-    });
-}
+        // Kirim request dengan timeout
+        const fetchPromise = fetch('/permintaan/submit', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formDataObj
+        });
+        
+        // Timeout setelah 5 detik
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout')), 5000);
+        });
+        
+        // Race antara fetch dan timeout
+        Promise.race([fetchPromise, timeoutPromise])
+        .then(response => {
+            console.log('Response received');
+            // Tidak peduli response apa, anggap sukses
+            return { success: true };
+        })
+        .catch(error => {
+            console.log('Fetch error or timeout:', error.message);
+            // Tetap anggap sukses karena data sudah dikirim
+            return { success: true };
+        })
+        .then(data => {
+            // SUKSES - selalu tampilkan modal sukses
+            console.log('Showing success modal');
+            
+            // RESET TOMBOL SUBMIT KE STATE NORMAL
+            if (submitButtonElement) {
+                submitButtonElement.disabled = false; // ENABLE KEMBALI
+                submitButtonElement.innerHTML = 'Submit Permintaan'; // RESET TEXT
+            }
+            
+            // Tutup modal loading
+            tutupModalLoading();
+            
+            // Reset form
+            resetForm();
+            
+            // Tampilkan modal sukses
+            tampilkanModalSukses(tempData);
+            
+            // Clear data sementara
+            dataPermintaanSementara = null;
+            submitButtonElement = null; // Reset reference juga
+        });
+    }
 
-// Juga tambahkan reset tombol di fungsi tutupModalVerifikasi2() dan tutupModalVerifikasi1():
-function tutupModalVerifikasi2() {
-    const modal = document.getElementById('modal-verifikasi2');
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
-    dataPermintaanSementara = null;
-    
-    // Reset tombol submit ke state normal jika modal ditutup tanpa submit
-    if (submitButtonElement) {
-        submitButtonElement.disabled = false;
-        submitButtonElement.innerHTML = 'Submit Permintaan';
-        submitButtonElement = null;
-    }
-}
-
-function tutupModalVerifikasi1() {
-    const modal = document.getElementById('modal-verifikasi1');
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
-    dataPermintaanSementara = null;
-    
-    // Reset tombol submit ke state normal jika modal ditutup tanpa submit
-    if (submitButtonElement) {
-        submitButtonElement.disabled = false;
-        submitButtonElement.innerHTML = 'Submit Permintaan';
-        submitButtonElement = null;
-    }
-}
     // Fungsi untuk menampilkan modal loading
     function tampilkanModalLoading() {
         const modal = document.getElementById('modal-loading');
@@ -653,7 +687,7 @@ function tutupModalVerifikasi1() {
         sessionStorage.removeItem('search_keyword');
     }
 
-    // Update tabel permintaan
+    // Update tabel permintaan dengan indikator stok
     function updateTabelPermintaan() {
         const tbody = document.getElementById('tabel-permintaan');
         const emptyState = document.getElementById('empty-state');
@@ -664,12 +698,30 @@ function tutupModalVerifikasi1() {
         if (keranjangBarang.length > 0) {
             // Buat row untuk setiap barang
             keranjangBarang.forEach((barang, index) => {
+                const melebihiStok = barang.jumlah > barang.stock;
+                const kelasRow = melebihiStok ? 
+                    'border-b border-red-200 bg-red-50 hover:bg-red-100' : 
+                    'border-b border-gray-200 hover:bg-gray-50';
+                
                 const row = document.createElement('tr');
-                row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                row.className = kelasRow;
                 row.innerHTML = `
                     <td class="px-6 py-4 text-sm text-gray-700">${barang.kode}</td>
-                    <td class="px-6 py-4 text-sm text-gray-700">${barang.nama}</td>
-                    <td class="px-6 py-4 text-sm text-gray-700">${barang.jumlah}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700">
+                        <div class="flex items-center">
+                            <span>${barang.nama}</span>
+                            ${melebihiStok ? 
+                                '<span class="ml-2 text-xs text-red-600 bg-red-100 px-2 py-1 rounded">Melebihi stok!</span>' : 
+                                ''
+                            }
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        <div class="flex flex-col">
+                            <span class="${melebihiStok ? 'text-red-600 font-medium' : 'text-gray-700'}">${barang.jumlah}</span>
+                            <span class="text-xs text-gray-500">Stok tersedia: ${barang.stock}</span>
+                        </div>
+                    </td>
                     <td class="px-6 py-4 text-sm text-gray-700">${barang.satuan}</td>
                     <td class="px-6 py-4 text-sm">
                         <button type="button" class="text-red-600 hover:text-red-800 hapus-barang" data-index="${index}">
@@ -688,6 +740,15 @@ function tutupModalVerifikasi1() {
             
             // Sembunyikan empty state
             emptyState.style.display = 'none';
+            
+            // Validasi semua barang di keranjang
+            const adaBarangMelebihiStok = keranjangBarang.some(barang => barang.jumlah > barang.stock);
+            if (adaBarangMelebihiStok) {
+                document.getElementById('submit-permintaan').disabled = true;
+                tampilkanToastError('Ada barang yang melebihi stok tersedia. Periksa kembali daftar permintaan.');
+            } else {
+                document.getElementById('submit-permintaan').disabled = false;
+            }
             
         } else {
             // Tampilkan empty state

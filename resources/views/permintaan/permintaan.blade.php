@@ -148,7 +148,7 @@
                     </div>
                 </div>
 
-                <!-- Daftar Barang Hasil Pencarian -->
+                <!-- Di bagian hasil pencarian barang -->
                 <div id="daftar-barang" class="hidden mb-6">
                     <h4 class="text-md font-semibold text-gray-900 mb-3">Hasil Pencarian</h4>
                     <div class="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
